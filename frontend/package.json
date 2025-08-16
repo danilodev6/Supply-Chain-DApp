@@ -1,0 +1,32 @@
+{
+  "name": "supply-chain-dapp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@web3modal/ethers": "^5.1.11",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.26.2",
+    "next": "15.4.6",
+    "react": "^19.1.1",
+    "react-dom": "19.1.0",
+    "web3modal": "^1.9.12"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.4",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "prettier": "^3.6.2",
+    "prettier-plugin-solidity": "^2.1.0",
+    "solhint": "^6.0.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
