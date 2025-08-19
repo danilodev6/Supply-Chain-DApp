@@ -1,3 +1,4 @@
+"use client";
 import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import Web3Modal from "web3modal";
@@ -17,11 +18,57 @@ type shipment = {
   price: number;
 };
 
+// Define the context type interface
+interface TrackingContextType {
+  DappName: string;
+  currentAccount: string | null;
+  createShipment: (shipment: shipment) => Promise<void>;
+  payForShipment: (shipmentId: number) => Promise<ethers.ContractTransactionResponse>;
+  startShipment: (shipmentId: number) => Promise<ethers.ContractTransactionResponse>;
+  completeShipment: (shipmentId: number) => Promise<ethers.ContractTransactionResponse>;
+  getShipment: (shipmentId: number) => Promise<shipment>;
+  getAllShipments: () => Promise<shipment[]>;
+  getShipmentsBySender: (sender: string) => Promise<shipment[]>;
+  getShipmentsCount: () => Promise<number>;
+  connectWallet: () => Promise<string | void>;
+}
+
 // Fetching the contract
 export const fetchContract = (signerOrProvider: ethers.Signer | ethers.Provider) =>
   new ethers.Contract(ContractAddress, ContractABI, signerOrProvider);
 
-export const TrackingContext = React.createContext({});
+// Create context with proper typing and default values
+export const TrackingContext = React.createContext<TrackingContextType>({
+  DappName: "",
+  currentAccount: null,
+  createShipment: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+  payForShipment: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+  startShipment: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+  completeShipment: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+  getShipment: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+  getAllShipments: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+  getShipmentsBySender: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+  getShipmentsCount: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+  connectWallet: async () => {
+    throw new Error("TrackingContext not initialized");
+  },
+});
 
 export const TrackingProvider = ({ children }: { children: React.ReactNode }) => {
   //State variables
@@ -29,7 +76,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
 
   // Helper function to get shipment details
-  const getShipment = async (shipmentId: number) => {
+  const getShipment = async (shipmentId: number): Promise<shipment> => {
     try {
       const web3Modal = new Web3Modal();
       const connection = await web3Modal.connect();
@@ -46,7 +93,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   // Get all shipments
-  const getAllShipments = async () => {
+  const getAllShipments = async (): Promise<shipment[]> => {
     console.log("Fetching all shipments");
     try {
       const web3Modal = new Web3Modal();
@@ -72,7 +119,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   // Get shipments count for the current sender
-  const getShipmentsCount = async () => {
+  const getShipmentsCount = async (): Promise<number> => {
     try {
       if (!window.ethereum) {
         console.error("MetaMask is not installed");
@@ -94,11 +141,11 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   // Get shipments by sender
-  const getShipmentsBySender = async (sender: string) => {
+  const getShipmentsBySender = async (sender: string): Promise<shipment[]> => {
     try {
       if (!window.ethereum) {
         console.error("MetaMask is not installed");
-        return 0;
+        return [];
       }
 
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -124,7 +171,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   // Create a new shipment ( for sender )
-  const createShipment = async (shipment: shipment) => {
+  const createShipment = async (shipment: shipment): Promise<void> => {
     console.log("Creating shipment:", shipment);
     const { receiver, pickupTime, distance, price } = shipment;
 
@@ -150,7 +197,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   // Pay for a shipment ( for receiver )
-  const payForShipment = async (shipmentId: number) => {
+  const payForShipment = async (shipmentId: number): Promise<ethers.ContractTransactionResponse> => {
     console.log("Paying for shipment with ID:", shipmentId);
     try {
       // Get shipment details to know the price
@@ -177,7 +224,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   // Start a shipment ( for sender )
-  const startShipment = async (shipmentId: number) => {
+  const startShipment = async (shipmentId: number): Promise<ethers.ContractTransactionResponse> => {
     console.log("Starting shipment with ID:", shipmentId);
     try {
       const web3Modal = new Web3Modal();
@@ -197,7 +244,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   // Complete a shipment ( for receiver )
-  const completeShipment = async (shipmentId: number) => {
+  const completeShipment = async (shipmentId: number): Promise<ethers.ContractTransactionResponse> => {
     console.log("Completing shipment with ID:", shipmentId);
     try {
       const web3Modal = new Web3Modal();
@@ -216,9 +263,9 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const checkAccountConnection = async () => {
+  const checkAccountConnection = async (): Promise<void> => {
     try {
-      if (!window.ethereum) return "MetaMask is not installed";
+      if (!window.ethereum) return;
 
       const accounts = await window.ethereum.request({ method: "eth_accounts" });
       if (accounts.length > 0) {
@@ -230,37 +277,40 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const connectWallet = async () => {
+  const connectWallet = async (): Promise<string | void> => {
     try {
       if (!window.ethereum) return "MetaMask is not installed";
 
-      const accounts = await window.ethereum.request({ method: "eth_accounts" });
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       if (accounts.length > 0) {
         setCurrentAccount(accounts[0]);
       }
     } catch (error) {
-      console.error("Error checking account connection:", error);
+      console.error("Error connecting wallet:", error);
       throw error;
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     checkAccountConnection();
-  },[]);
+  }, []);
 
   return (
-    <TrackingContext.Provider value={{
-      DappName,
-      currentAccount,
-      createShipment,
-      payForShipment,
-      startShipment,
-      completeShipment,
-      getShipment,
-      getAllShipments,
-      getShipmentsBySender,
-      getShipmentsCount,
-      connectWallet,}}>
+    <TrackingContext.Provider
+      value={{
+        DappName,
+        currentAccount,
+        createShipment,
+        payForShipment,
+        startShipment,
+        completeShipment,
+        getShipment,
+        getAllShipments,
+        getShipmentsBySender,
+        getShipmentsCount,
+        connectWallet,
+      }}
+    >
       {children}
     </TrackingContext.Provider>
   );

@@ -1,2 +1,2 @@
-import tracking from "../../../contracts/artifacts/contracts/Tracking.sol/Tracking.json";
+import tracking from "./Tracking.json";
 export const trackingABI = tracking.abi;
