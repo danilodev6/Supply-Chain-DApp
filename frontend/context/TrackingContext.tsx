@@ -72,12 +72,16 @@ export const TrackingContext = React.createContext<TrackingContextType>({
 
 export const TrackingProvider = ({ children }: { children: React.ReactNode }) => {
   //State variables
-  const DappName = "Product Tracking Dapp";
+  const DappName = "Tracking Dapp";
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
 
   // Helper function to get shipment details
   const getShipment = async (shipmentId: number): Promise<shipment> => {
     try {
+      if (!currentAccount) {
+        throw new Error("Please connect your wallet first");
+      }
+
       const web3Modal = new Web3Modal();
       const connection = await web3Modal.connect();
       const provider = new ethers.BrowserProvider(connection);
@@ -92,10 +96,15 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  // Get all shipments
+  // Get all shipments - ONLY call this when wallet is connected
   const getAllShipments = async (): Promise<shipment[]> => {
     console.log("Fetching all shipments");
     try {
+      if (!currentAccount) {
+        console.log("No wallet connected, returning empty array");
+        return [];
+      }
+
       const web3Modal = new Web3Modal();
       const connection = await web3Modal.connect();
       const provider = new ethers.BrowserProvider(connection);
@@ -108,65 +117,71 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
         receiver: shipment.receiver,
         pickupTime: shipment.pickupTime,
         deliveryTime: shipment.deliveryTime,
+        distance: shipment.distance,
         isPaid: shipment.isPaid,
         status: shipment.status,
         price: ethers.formatEther(shipment.price), // Convert from wei to ether
       }));
     } catch (error) {
       console.error("Error fetching all shipments:", error);
-      throw error;
+      return [];
     }
   };
 
   // Get shipments count for the current sender
   const getShipmentsCount = async (): Promise<number> => {
     try {
+      if (!currentAccount) {
+        console.log("No wallet connected");
+        return 0;
+      }
+
       if (!window.ethereum) {
         console.error("MetaMask is not installed");
         return 0;
       }
 
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      setCurrentAccount(accounts[0]);
-
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = fetchContract(provider);
       const ShipmentsCount = await contract.getShipmentsCountBySender(currentAccount);
 
-      return ShipmentsCount;
+      return Number(ShipmentsCount);
     } catch (error) {
       console.error("Error fetching shipments count:", error);
-      throw error;
+      return 0;
     }
   };
 
   // Get shipments by sender
   const getShipmentsBySender = async (sender: string): Promise<shipment[]> => {
     try {
+      if (!currentAccount) {
+        console.log("No wallet connected");
+        return [];
+      }
+
       if (!window.ethereum) {
         console.error("MetaMask is not installed");
         return [];
       }
 
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      setCurrentAccount(accounts[0]);
-
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = fetchContract(provider);
-      const shipments = await contract.getShipmentsBySender(currentAccount);
+      const shipments = await contract.getShipmentsBySender(sender || currentAccount);
 
       return shipments.map((shipment: shipment) => ({
         sender: shipment.sender,
         receiver: shipment.receiver,
         pickupTime: shipment.pickupTime,
         deliveryTime: shipment.deliveryTime,
+        distance: shipment.distance,
         isPaid: shipment.isPaid,
         status: shipment.status,
         price: ethers.formatEther(shipment.price), // Convert from wei to ether
       }));
     } catch (error) {
       console.error("Error fetching shipments by sender:", error);
-      throw error;
+      return [];
     }
   };
 
@@ -176,6 +191,10 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
     const { receiver, pickupTime, distance, price } = shipment;
 
     try {
+      if (!currentAccount) {
+        throw new Error("Please connect your wallet first");
+      }
+
       const web3Modal = new Web3Modal();
       const connection = await web3Modal.connect();
 
@@ -192,7 +211,8 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
       await createShipmentTx.wait();
       console.log("Shipment created successfully: ", createShipmentTx);
     } catch (error) {
-      console.error("Error connecting to wallet:", error);
+      console.error("Error creating shipment:", error);
+      throw error;
     }
   };
 
@@ -200,6 +220,10 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   const payForShipment = async (shipmentId: number): Promise<ethers.ContractTransactionResponse> => {
     console.log("Paying for shipment with ID:", shipmentId);
     try {
+      if (!currentAccount) {
+        throw new Error("Please connect your wallet first");
+      }
+
       // Get shipment details to know the price
       const shipment = await getShipment(shipmentId);
       const price = shipment.price; // This is already in wei from the contract
@@ -227,6 +251,10 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   const startShipment = async (shipmentId: number): Promise<ethers.ContractTransactionResponse> => {
     console.log("Starting shipment with ID:", shipmentId);
     try {
+      if (!currentAccount) {
+        throw new Error("Please connect your wallet first");
+      }
+
       const web3Modal = new Web3Modal();
       const connection = await web3Modal.connect();
       const provider = new ethers.BrowserProvider(connection);
@@ -247,6 +275,10 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
   const completeShipment = async (shipmentId: number): Promise<ethers.ContractTransactionResponse> => {
     console.log("Completing shipment with ID:", shipmentId);
     try {
+      if (!currentAccount) {
+        throw new Error("Please connect your wallet first");
+      }
+
       const web3Modal = new Web3Modal();
       const connection = await web3Modal.connect();
       const provider = new ethers.BrowserProvider(connection);
@@ -263,17 +295,21 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
+  // FIXED: This function now only checks for already connected accounts
   const checkAccountConnection = async (): Promise<void> => {
     try {
       if (!window.ethereum) return;
 
+      // Only check for already connected accounts, don't prompt user
       const accounts = await window.ethereum.request({ method: "eth_accounts" });
       if (accounts.length > 0) {
         setCurrentAccount(accounts[0]);
+        console.log("Already connected account found:", accounts[0]);
+      } else {
+        console.log("No connected accounts found");
       }
     } catch (error) {
       console.error("Error checking account connection:", error);
-      throw error;
     }
   };
 
@@ -281,9 +317,11 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       if (!window.ethereum) return "MetaMask is not installed";
 
+      // This is the only place where we should prompt for connection
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       if (accounts.length > 0) {
         setCurrentAccount(accounts[0]);
+        console.log("Wallet connected:", accounts[0]);
       }
     } catch (error) {
       console.error("Error connecting wallet:", error);
@@ -293,6 +331,28 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
 
   useEffect(() => {
     checkAccountConnection();
+
+    // Listen for account changes
+    if (window.ethereum) {
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (accounts.length > 0) {
+          setCurrentAccount(accounts[0]);
+          console.log("Account changed to:", accounts[0]);
+        } else {
+          setCurrentAccount(null);
+          console.log("Account disconnected");
+        }
+      };
+
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+
+      // Cleanup listener on unmount
+      return () => {
+        if (window.ethereum && window.ethereum.removeListener) {
+          window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+        }
+      };
+    }
   }, []);
 
   return (

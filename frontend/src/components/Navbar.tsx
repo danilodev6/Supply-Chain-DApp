@@ -1,3 +1,7 @@
-export const Navbar = () => {
-  return <div>Navbar</div>;
+import MenuHamb from "./MenuHamb";
+
+const Navbar = () => {
+  return <MenuHamb />;
 };
+
+export default Navbar;

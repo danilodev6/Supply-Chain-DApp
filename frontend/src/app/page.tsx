@@ -39,58 +39,88 @@ export default function Home() {
 
   // Data State Variables - properly typed
   const [allShipmentsData, setAllShipmentsData] = useState<shipment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
+  // FIXED: Only fetch shipments when wallet is connected
   useEffect(() => {
     const fetchAllShipments = async () => {
+      // Only fetch if wallet is connected
+      if (!currentAccount) {
+        console.log("No wallet connected, skipping shipment fetch");
+        setAllShipmentsData([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
+        console.log("Fetching shipments for connected account:", currentAccount);
         const allData = await getAllShipments();
         setAllShipmentsData(allData);
       } catch (error) {
         console.error("Error fetching shipments:", error);
+        setAllShipmentsData([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAllShipments();
-  }, [getAllShipments]);
+  }, [currentAccount, getAllShipments]); // Now depends on currentAccount
 
   return (
     <>
-      <h1>Hello, Next.js!</h1>
-      <div>Home</div>
+      <h1 className="text-center text-white-base text-3xl">Track your supplies</h1>
+
+      {!currentAccount && (
+        <div className="text-center p-4">
+          <p className="text-white-platinum/60">
+            Please connect your wallet using the button in the top navigation to view shipments
+          </p>
+        </div>
+      )}
+
       <Services
         setOpenProfile={setOpenProfile}
         setCompleteModal={setCompleteModal}
         setGetModal={setGetModal}
         setStartModal={setStartModal}
       />
+
       <Table setCreateShipmentModal={setCreateShipmentModal} allShipmentsData={allShipmentsData} />
+
       <Form
         createShipmentModal={createShipmentModal}
         createShipment={createShipment}
         setCreateShipmentModal={setCreateShipmentModal}
       />
+
       <Profile
         openProfile={openProfile}
         setOpenProfile={setOpenProfile}
         currentAccount={currentAccount}
         getShipmentsCount={getShipmentsCount}
       />
+
       <CompleteShipment
         completeModal={completeModal}
         setCompleteModal={setCompleteModal}
         completeShipment={completeShipment}
       />
+
       <GetShipment getModal={getModal} setGetModal={setGetModal} getShipment={getShipment} />
+
       <StartShipment startModal={startModal} setStartModal={setStartModal} startShipment={startShipment} />
-      {loading ? (
-        <div>Loading shipments...</div>
-      ) : (
+
+      {currentAccount && (
         <div>
-          <p>Total shipments: {allShipmentsData.length}</p>
+          {loading ? (
+            <div>Loading shipments...</div>
+          ) : (
+            <div>
+              <p>Total shipments: {allShipmentsData.length}</p>
+            </div>
+          )}
         </div>
       )}
     </>
