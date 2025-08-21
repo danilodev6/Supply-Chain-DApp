@@ -1,11 +1,9 @@
 import type React from "react";
-import type { Dispatch, SetStateAction } from "react";
 import { convertTime, formatAddress, formatPrice, getStatusText } from "@/utils/formatters";
 import type { shipment } from "../types/shipment";
 
 // Table component props
 export interface TableProps {
-  setCreateShipmentModal: Dispatch<SetStateAction<boolean>>;
   allShipmentsData: shipment[];
 }
 

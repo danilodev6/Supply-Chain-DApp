@@ -5,18 +5,7 @@ import Web3Modal from "web3modal";
 import { trackingABI as ContractABI } from "@/constants/contractABI";
 // Internal imports
 import { contractAddress as ContractAddress } from "@/constants/contractAddress";
-
-// Shipment type definition
-type shipment = {
-  sender: string;
-  receiver: string;
-  pickupTime: string;
-  deliveryTime: string;
-  distance: number;
-  isPaid: boolean;
-  status: { Pending: boolean; Shipped: boolean; Delivered: boolean; Cancelled: boolean };
-  price: number;
-};
+import type { shipment } from "@/types/shipment";
 
 // Define the context type interface
 interface TrackingContextType {
@@ -119,7 +108,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
         deliveryTime: shipment.deliveryTime,
         distance: Number(shipment.distance),
         isPaid: shipment.isPaid,
-        status: Number(shipment.status), // Convert BigInt enum value to number
+        status: Number(shipment.status),
         price: ethers.formatEther(shipment.price),
       }));
     } catch (error) {

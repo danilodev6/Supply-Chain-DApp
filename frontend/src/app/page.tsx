@@ -2,18 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 import { TrackingContext } from "@/../context/TrackingContext";
 import { CompleteShipment, Form, GetShipment, Profile, Services, StartShipment, Table } from "@/components/index";
-
-// Import the shipment type from your context file
-type shipment = {
-  sender: string;
-  receiver: string;
-  pickupTime: string;
-  deliveryTime: string;
-  distance: number;
-  isPaid: boolean;
-  status: { pending: boolean; shipped: boolean; delivered: boolean; cancelled: boolean };
-  price: number;
-};
+import type { shipment } from "@/types/shipment";
 
 export default function Home() {
   const context = useContext(TrackingContext);
