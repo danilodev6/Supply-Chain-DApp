@@ -66,28 +66,31 @@ export default function Home() {
     };
 
     fetchAllShipments();
-  }, [currentAccount, getAllShipments]); // Now depends on currentAccount
+  }, [currentAccount, getAllShipments]);
 
   return (
-    <>
-      <h1 className="text-center text-white-base text-3xl">Track your supplies</h1>
+    <div className="mt-40 md:mt-20">
+      <div className="flex mb-5 md:mb-10 flex-col justify-between text-center items-center px-4 py-2">
+        <h1 className="text-center text-white-base text-3xl">Track your supplies</h1>
 
-      {!currentAccount && (
-        <div className="text-center p-4">
-          <p className="text-white-platinum/60">
-            Please connect your wallet using the button in the top navigation to view shipments
-          </p>
-        </div>
-      )}
+        {!currentAccount && (
+          <div className="text-center p-4">
+            <p className="text-white-platinum/60">
+              Please connect your wallet using the button in the top navigation to view shipments
+            </p>
+          </div>
+        )}
+      </div>
 
       <Services
+        setCreateShipmentModal={setCreateShipmentModal}
         setOpenProfile={setOpenProfile}
         setCompleteModal={setCompleteModal}
         setGetModal={setGetModal}
         setStartModal={setStartModal}
       />
 
-      <Table setCreateShipmentModal={setCreateShipmentModal} allShipmentsData={allShipmentsData} />
+      <Table allShipmentsData={allShipmentsData} />
 
       <Form
         createShipmentModal={createShipmentModal}
@@ -123,6 +126,6 @@ export default function Home() {
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }

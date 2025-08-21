@@ -14,7 +14,7 @@ type shipment = {
   deliveryTime: string;
   distance: number;
   isPaid: boolean;
-  status: { pending: boolean; shipped: boolean; delivered: boolean; cancelled: boolean };
+  status: { Pending: boolean; Shipped: boolean; Delivered: boolean; Cancelled: boolean };
   price: number;
 };
 
@@ -117,10 +117,10 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
         receiver: shipment.receiver,
         pickupTime: shipment.pickupTime,
         deliveryTime: shipment.deliveryTime,
-        distance: shipment.distance,
+        distance: Number(shipment.distance),
         isPaid: shipment.isPaid,
-        status: shipment.status,
-        price: ethers.formatEther(shipment.price), // Convert from wei to ether
+        status: Number(shipment.status), // Convert BigInt enum value to number
+        price: ethers.formatEther(shipment.price),
       }));
     } catch (error) {
       console.error("Error fetching all shipments:", error);
@@ -174,10 +174,10 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
         receiver: shipment.receiver,
         pickupTime: shipment.pickupTime,
         deliveryTime: shipment.deliveryTime,
-        distance: shipment.distance,
+        distance: Number(shipment.distance),
         isPaid: shipment.isPaid,
-        status: shipment.status,
-        price: ethers.formatEther(shipment.price), // Convert from wei to ether
+        status: Number(shipment.status), // Convert BigInt enum value to number
+        price: ethers.formatEther(shipment.price),
       }));
     } catch (error) {
       console.error("Error fetching shipments by sender:", error);
