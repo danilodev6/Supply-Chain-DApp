@@ -4,6 +4,13 @@
 
 ---
 
+# Screen Shots
+![Home Page](./frontend/public/project2-1.png)
+
+![Create Product Page](./frontend/public/project2-2.png)
+
+![Payment Page](./frontend/public/project2-3.png)
+
 ## Overview
 
 This project is a decentralized application (DApp) that allows users to track products through the supply chain. It ensures transparency and security by leveraging smart contracts on Ethereum-compatible networks.  
