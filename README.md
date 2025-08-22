@@ -5,11 +5,11 @@
 ---
 
 # Screen Shots
-![Home Page](./frontend/public/project2-1.png)
+![Home Page](./frontend/public/homepage.png)
 
-![Create Product Page](./frontend/public/project2-2.png)
+![Create Product Page](./frontend/public/createpage.png)
 
-![Payment Page](./frontend/public/project2-3.png)
+![Payment Page](./frontend/public/paymentpage.png)
 
 ## Overview
 
