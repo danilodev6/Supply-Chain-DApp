@@ -7,6 +7,7 @@ export interface ServicesProps {
   setCompleteModal: Dispatch<SetStateAction<boolean>>;
   setGetModal: Dispatch<SetStateAction<boolean>>;
   setStartModal: Dispatch<SetStateAction<boolean>>;
+  setPayModal: Dispatch<SetStateAction<boolean>>;
 }
 
 const Services: React.FC<ServicesProps> = ({
@@ -15,6 +16,7 @@ const Services: React.FC<ServicesProps> = ({
   setCompleteModal,
   setGetModal,
   setStartModal,
+  setPayModal,
 }) => {
   const serviceCards = [
     {
@@ -27,35 +29,33 @@ const Services: React.FC<ServicesProps> = ({
     },
     {
       id: 2,
-      title: "View Profile",
-      description: "Check your shipping profile",
-      action: () => setOpenProfile(true),
-    },
-    {
-      id: 3,
-      title: "Get Shipment",
-      description: "Track a specific shipment",
-      action: () => setGetModal(true),
-    },
-    {
-      id: 4,
       title: "Start Shipment",
       description: "Begin shipment delivery",
       action: () => setStartModal(true),
     },
     {
-      id: 5,
+      id: 3,
       title: "Complete Shipment",
       description: "Mark shipment as delivered",
       action: () => setCompleteModal(true),
     },
     {
+      id: 4,
+      title: "Pay For Shipment",
+      description: "Pay your shipping fees",
+      action: () => setPayModal(true),
+    },
+    {
+      id: 5,
+      title: "Get Shipment",
+      description: "Track a specific shipment",
+      action: () => setGetModal(true),
+    },
+    {
       id: 6,
-      title: "Shipments Counts",
-      description: "View your shipment statistics",
-      action: () => {
-        console.log("Shipments Counts clicked");
-      },
+      title: "View Profile",
+      description: "Check your shipping profile",
+      action: () => setOpenProfile(true),
     },
   ];
 

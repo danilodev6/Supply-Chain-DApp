@@ -1,20 +1,22 @@
 "use client";
+import type { ethers } from "ethers";
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import type { shipment } from "@/types/shipment";
 import { convertTime, formatAddress, formatPrice, getStatusText } from "@/utils/formatters";
 
-// GetShipment component props
-export interface GetShipmentProps {
-  getModal: boolean;
-  setGetModal: Dispatch<SetStateAction<boolean>>;
+// PayForShipment component props
+export interface PayForShipmentProps {
+  payModal: boolean;
+  setPayModal: Dispatch<SetStateAction<boolean>>;
+  payForShipment: (shipmentId: number) => Promise<ethers.ContractTransactionResponse>;
   getShipment: (shipmentId: number) => Promise<shipment>;
 }
 
-const GetShipment: React.FC<GetShipmentProps> = ({ getModal, setGetModal, getShipment }) => {
+const PayForShipment: React.FC<PayForShipmentProps> = ({ payModal, setPayModal, payForShipment, getShipment }) => {
   const [index, setIndex] = useState<number>(0);
-  const [singleShipmentData, setSingleShipmentData] = useState<shipment | null>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [singleShipmentData, setSingleShipmentData] = useState<shipment | null>(null);
 
   const getShipmentHandler = async () => {
     // Basic validation
@@ -35,9 +37,42 @@ const GetShipment: React.FC<GetShipmentProps> = ({ getModal, setGetModal, getShi
     }
   };
 
+  const payShipmentHandler = async () => {
+    // Basic validation
+    if (!singleShipmentData) {
+      alert("Please search for a shipment first");
+      return;
+    }
+
+    if (singleShipmentData.isPaid) {
+      alert("This shipment is already paid for");
+      return;
+    }
+
+    if (Number(singleShipmentData.status) !== 0) {
+      // Not pending
+      alert("This shipment cannot be paid for (not in pending status)");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const paymentResponse = await payForShipment(index);
+      console.log("Payment transaction response:", paymentResponse);
+      alert("Payment successful!");
+      // Refresh shipment data after payment
+      await getShipmentHandler();
+    } catch (error) {
+      console.error("Error paying for shipment:", error);
+      alert("Payment failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div>
-      {getModal ? (
+      {payModal ? (
         <div className="fixed inset-0 z-50 overflow-auto">
           <div className="fixed inset-0 w-full h-full bg-jet-black/80"></div>
           <div className="flex items-center min-h-screen px-4 py-8">
@@ -48,7 +83,7 @@ const GetShipment: React.FC<GetShipmentProps> = ({ getModal, setGetModal, getShi
                   type="button"
                   className="p-1 text-stone-base hover:text-stone-base/60 transition-colors"
                   onClick={() => {
-                    setGetModal(false);
+                    setPayModal(false);
                     setSingleShipmentData(null);
                     setIndex(0);
                   }} // Reset state on close
@@ -62,8 +97,8 @@ const GetShipment: React.FC<GetShipmentProps> = ({ getModal, setGetModal, getShi
 
               {/* Modal content */}
               <div className="px-6 pb-6 text-center">
-                <h4 className="text-xl font-semibold text-jet-black mb-2">Tracking Product</h4>
-                <p className="text-gray-500 text-sm mb-6">Search your product by id</p>
+                <h4 className="text-xl font-semibold text-jet-black mb-2">Pay your Product</h4>
+                <p className="text-gray-500 text-sm mb-6">Search your product by id to pay</p>
 
                 {/* Form */}
                 <div className="space-y-4">
@@ -116,15 +151,34 @@ const GetShipment: React.FC<GetShipmentProps> = ({ getModal, setGetModal, getShi
                       <span className="font-semibold">Distance:</span> {singleShipmentData.distance} km
                     </p>
                     <p>
+                      <span className="font-semibold">Is paid:</span> {singleShipmentData.isPaid ? "Yes" : "No"}
+                    </p>
+                    <p>
                       <span className="font-semibold">Status:</span> {getStatusText(singleShipmentData.status)}
                     </p>
                     <p>
                       <span className="font-semibold">Price:</span> {formatPrice(singleShipmentData.price)}
                     </p>
-                    <p>
-                      <span className="font-semibold">Is paid:</span> {singleShipmentData.isPaid ? "Yes" : "No"}
-                    </p>
                   </div>
+                  {/* Pay Shipment button */}
+                  <button
+                    type="button"
+                    onClick={payShipmentHandler}
+                    disabled={isLoading || singleShipmentData.isPaid || Number(singleShipmentData.status) !== 0}
+                    className={`w-full mt-2 font-bold shadow-[inset_0_0_0_1px_currentColor] py-3 px-4 rounded-lg transition-colors duration-200 ${
+                      singleShipmentData.isPaid
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-green-800 hover:bg-white-base hover:text-green-800 hover:border-green-800 text-white-base"
+                    }`}
+                  >
+                    {isLoading
+                      ? "Paying..."
+                      : singleShipmentData.isPaid
+                        ? "Already Paid"
+                        : Number(singleShipmentData.status) !== 0
+                          ? "Cannot Pay"
+                          : "Pay Shipment"}
+                  </button>
                 </div>
               ) : (
                 <p className="px-6 pb-6 text-center text-stone-base">No shipment found with this index</p>
@@ -139,4 +193,4 @@ const GetShipment: React.FC<GetShipmentProps> = ({ getModal, setGetModal, getShi
   );
 };
 
-export default GetShipment;
+export default PayForShipment;

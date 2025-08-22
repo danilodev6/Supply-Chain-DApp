@@ -10,7 +10,7 @@ export interface ProfileProps {
 }
 
 const Profile: React.FC<ProfileProps> = ({ openProfile, setOpenProfile, currentAccount, getShipmentsCount }) => {
-  return <div>Profile</div>;
+  return <div></div>;
 };
 
 export default Profile;

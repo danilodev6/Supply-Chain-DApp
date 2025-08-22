@@ -78,6 +78,8 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
       const contract = fetchContract(signer);
 
       const shipment = await contract.getShipment(shipmentId);
+      const contractBalance = await provider.getBalance(ContractAddress);
+      console.log("Contract balance:", ethers.formatEther(contractBalance));
       return shipment;
     } catch (error) {
       console.error("Error fetching shipment:", error);
