@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 // Services component props
 export interface ServicesProps {
   setCreateShipmentModal: Dispatch<SetStateAction<boolean>>;
-  setOpenProfile: Dispatch<SetStateAction<boolean>>;
+  setProfileModal: Dispatch<SetStateAction<boolean>>;
   setCompleteModal: Dispatch<SetStateAction<boolean>>;
   setGetModal: Dispatch<SetStateAction<boolean>>;
   setStartModal: Dispatch<SetStateAction<boolean>>;
@@ -12,7 +12,7 @@ export interface ServicesProps {
 
 const Services: React.FC<ServicesProps> = ({
   setCreateShipmentModal,
-  setOpenProfile,
+  setProfileModal,
   setCompleteModal,
   setGetModal,
   setStartModal,
@@ -55,7 +55,7 @@ const Services: React.FC<ServicesProps> = ({
       id: 6,
       title: "View Profile",
       description: "Check your shipping profile",
-      action: () => setOpenProfile(true),
+      action: () => setProfileModal(true),
     },
   ];
 

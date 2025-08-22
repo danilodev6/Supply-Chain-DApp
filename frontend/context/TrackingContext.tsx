@@ -134,7 +134,7 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = fetchContract(provider);
-      const ShipmentsCount = await contract.getShipmentsCountBySender(currentAccount);
+      const ShipmentsCount = await contract.getShipmentCountByUser(currentAccount);
 
       return Number(ShipmentsCount);
     } catch (error) {
@@ -158,18 +158,34 @@ export const TrackingProvider = ({ children }: { children: React.ReactNode }) =>
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = fetchContract(provider);
-      const shipments = await contract.getShipmentsBySender(sender || currentAccount);
 
-      return shipments.map((shipment: shipment) => ({
-        sender: shipment.sender,
-        receiver: shipment.receiver,
-        pickupTime: shipment.pickupTime,
-        deliveryTime: shipment.deliveryTime,
-        distance: Number(shipment.distance),
-        isPaid: shipment.isPaid,
-        status: Number(shipment.status), // Convert BigInt enum value to number
-        price: ethers.formatEther(shipment.price),
-      }));
+      // Get array of shipment IDs for this user
+      const shipmentIds = await contract.getUserShipments(sender || currentAccount);
+      console.log("User shipment IDs:", shipmentIds);
+
+      // Fetch each individual shipment by its ID
+      const shipments: shipment[] = [];
+
+      for (let i = 0; i < shipmentIds.length; i++) {
+        const shipmentId = Number(shipmentIds[i]);
+        console.log("Fetching shipment ID:", shipmentId);
+
+        const shipmentData = await contract.getShipment(shipmentId);
+
+        shipments.push({
+          sender: shipmentData.sender,
+          receiver: shipmentData.receiver,
+          pickupTime: shipmentData.pickupTime,
+          deliveryTime: shipmentData.deliveryTime,
+          distance: Number(shipmentData.distance),
+          isPaid: shipmentData.isPaid,
+          status: Number(shipmentData.status),
+          price: Number(ethers.formatEther(shipmentData.price)),
+        });
+      }
+
+      console.log("Fetched shipments:", shipments);
+      return shipments;
     } catch (error) {
       console.error("Error fetching shipments by sender:", error);
       return [];

@@ -10,6 +10,7 @@ import {
   Services,
   StartShipment,
   Table,
+  UserShipmentsTable,
 } from "@/components/index";
 import type { shipment } from "@/types/shipment";
 
@@ -30,7 +31,7 @@ export default function Home() {
   } = context;
 
   const [createShipmentModal, setCreateShipmentModal] = useState(false);
-  const [openProfile, setOpenProfile] = useState(false);
+  const [profileModal, setProfileModal] = useState(false);
   const [startModal, setStartModal] = useState(false);
   const [completeModal, setCompleteModal] = useState(false);
   const [getModal, setGetModal] = useState(false);
@@ -83,7 +84,7 @@ export default function Home() {
 
       <Services
         setCreateShipmentModal={setCreateShipmentModal}
-        setOpenProfile={setOpenProfile}
+        setProfileModal={setProfileModal}
         setCompleteModal={setCompleteModal}
         setGetModal={setGetModal}
         setStartModal={setStartModal}
@@ -91,6 +92,8 @@ export default function Home() {
       />
 
       <Table allShipmentsData={allShipmentsData} />
+
+      <UserShipmentsTable getShipmentsBySender={getShipmentsBySender} currentAccount={currentAccount} />
 
       <Form
         createShipmentModal={createShipmentModal}
@@ -106,10 +109,12 @@ export default function Home() {
       />
 
       <Profile
-        openProfile={openProfile}
-        setOpenProfile={setOpenProfile}
+        profileModal={profileModal}
+        setProfileModal={setProfileModal}
+        setCreateShipmentModal={setCreateShipmentModal}
         currentAccount={currentAccount}
         getShipmentsCount={getShipmentsCount}
+        getShipmentsBySender={getShipmentsBySender}
       />
 
       <CompleteShipment
